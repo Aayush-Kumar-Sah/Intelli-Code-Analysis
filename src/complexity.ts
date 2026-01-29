@@ -163,11 +163,16 @@ function calculateHalsteadMetrics(
   const N1 = operators.length; // Total operators
   const N2 = operands.length; // Total operands
 
-  const vocabulary = n1 + n2;
-  const length = N1 + N2;
-  const calculatedLength = n1 * Math.log2(n1 || 1) + n2 * Math.log2(n2 || 1);
-  const volume = length * Math.log2(vocabulary || 1);
-  const difficulty = (n1 / 2) * (N2 / (n2 || 1));
+  // Ensure we have valid values to prevent division by zero and NaN
+  const safeN1 = Math.max(1, n1);
+  const safeN2 = Math.max(1, n2);
+  const safeVocabulary = Math.max(1, n1 + n2);
+  const safeLength = Math.max(1, N1 + N2);
+
+  const vocabulary = safeVocabulary;
+  const length = safeLength;
+  const volume = length * Math.log2(vocabulary);
+  const difficulty = (safeN1 / 2) * (N2 / safeN2);
   const effort = difficulty * volume;
   const time = effort / 18; // seconds
   const bugs = Math.pow(effort, 2 / 3) / 3000;
@@ -185,33 +190,37 @@ function calculateHalsteadMetrics(
 function extractOperators(code: string, language: string): string[] {
   const operators: string[] = [];
 
-  // Common operators
+  // Order matters - match longer patterns first to avoid double-counting
   const operatorPatterns = [
+    /===/g,
+    /!==/g,
+    /==/g,
+    /!=/g,
+    /<=/g,
+    />=/g,
+    /&&/g,
+    /\|\|/g,
     /\+/g,
     /-/g,
     /\*/g,
     /\//g,
     /%/g,
     /=/g,
-    /==/g,
-    /===/g,
-    /!=/g,
-    /!==/g,
     /</g,
     />/g,
-    /<=/g,
-    />=/g,
-    /&&/g,
-    /\|\|/g,
     /!/g,
     /\?/g,
     /:/g,
   ];
 
+  // Use a single pass to avoid overlapping matches
+  let remainingCode = code;
   operatorPatterns.forEach((pattern) => {
-    const matches = code.match(pattern);
+    const matches = remainingCode.match(pattern);
     if (matches) {
       operators.push(...matches);
+      // Remove matched operators to prevent double-counting
+      remainingCode = remainingCode.replace(pattern, " ");
     }
   });
 
@@ -229,10 +238,19 @@ function extractOperators(code: string, language: string): string[] {
 function extractOperands(code: string, language: string): string[] {
   const operands: string[] = [];
 
-  // Variables and identifiers
+  // JavaScript/TypeScript keywords that should be excluded
+  const keywords = new Set([
+    "if", "else", "for", "while", "return", "function", "class", "const", "let", 
+    "var", "new", "this", "try", "catch", "switch", "case", "break", "continue",
+    "default", "throw", "import", "export", "from", "as", "async", "await",
+    "typeof", "instanceof", "void", "delete", "in", "of"
+  ]);
+
+  // Variables and identifiers (excluding keywords)
   const identifiers = code.match(/\b[a-zA-Z_]\w*\b/g);
   if (identifiers) {
-    operands.push(...identifiers);
+    const filteredIdentifiers = identifiers.filter(id => !keywords.has(id));
+    operands.push(...filteredIdentifiers);
   }
 
   // Literals
@@ -261,13 +279,18 @@ function calculateMaintainabilityIndex(
   const lines = code.split("\n");
   const loc = lines.filter((line) => line.trim()).length;
 
+  // Ensure positive values for logarithms
+  const safeVolume = Math.max(1, halsteadMetrics.vocabulary);
+  const safeLength = Math.max(1, halsteadMetrics.length);
+  const safeLoc = Math.max(1, loc);
+  
   // Maintainability Index formula
-  const volume = Math.log(halsteadMetrics.vocabulary || 1) * halsteadMetrics.length;
+  const volume = Math.log(safeVolume) * safeLength;
   const MI =
     171 -
-    5.2 * Math.log(volume || 1) -
+    5.2 * Math.log(volume) -
     0.23 * cyclomaticComplexity -
-    16.2 * Math.log(loc || 1);
+    16.2 * Math.log(safeLoc);
 
   // Normalize to 0-100 scale
   const normalized = Math.max(0, Math.min(100, MI));

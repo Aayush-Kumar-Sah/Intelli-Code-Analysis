@@ -328,7 +328,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("Intelli Code Analysis MCP Server running on stdio");
+  
+  // Only log to stderr in development mode
+  if (process.env.NODE_ENV === "development") {
+    console.error("Intelli Code Analysis MCP Server running on stdio");
+  }
 }
 
 main().catch((error) => {

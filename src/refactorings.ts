@@ -114,10 +114,12 @@ function suggestRenameVariable(code: string, language: string): Refactoring[] {
 
   lines.forEach((line, index) => {
     // Single letter variables (except common ones like i, j, k in loops)
-    const vars = line.match(/\b[a-z]\b/g);
+    const vars = line.match(/\b[a-zA-Z]\b/g);
     if (vars && !/(for|while)\s*\(/.test(line)) {
       vars.forEach((v) => {
-        if (v !== "i" && v !== "j" && v !== "k") {
+        // Exclude common loop variables (case-insensitive)
+        const lowerV = v.toLowerCase();
+        if (lowerV !== "i" && lowerV !== "j" && lowerV !== "k") {
           refactorings.push({
             type: "Rename Variable",
             priority: "low",
