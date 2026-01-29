@@ -2,6 +2,26 @@
 
 An intelligent Model Context Protocol (MCP) server that enables AI agents to analyze codebases, detect code smells, suggest refactorings, and perform intelligent code transformations.
 
+## 🏁 Getting Started
+
+**New to the project?** Follow our comprehensive setup guide:
+
+📖 **[Complete Setup Guide (SETUP.md)](SETUP.md)** - Detailed instructions for installation, environment setup, and starting the project
+
+Quick start:
+```bash
+# Clone, install, and build
+git clone https://github.com/Aayush-Kumar-Sah/Intelli-Code-Analysis.git
+cd Intelli-Code-Analysis
+npm install
+npm run build
+
+# Run tests to verify installation
+npm test
+```
+
+For MCP client configuration and troubleshooting, see **[SETUP.md](SETUP.md)**.
+
 ## 🚀 Features
 
 - **MCP Server Implementation**: Full Model Context Protocol server with stdio transport
@@ -17,6 +37,12 @@ An intelligent Model Context Protocol (MCP) server that enables AI agents to ana
 
 - Node.js 18+ 
 - npm or yarn
+- Git
+
+**Environment Variables (Optional):**
+- `NODE_ENV` - Set to `development` for debug logging, or `production` (default) for clean stdio
+
+See [.env.example](.env.example) for environment configuration details.
 
 ## 🔧 Installation
 
@@ -30,7 +56,12 @@ npm install
 
 # Build the project
 npm run build
+
+# (Optional) Configure environment
+cp .env.example .env
 ```
+
+**Need help?** See the detailed **[Setup Guide (SETUP.md)](SETUP.md)** for troubleshooting and step-by-step instructions.
 
 ## 🎯 Usage
 
