@@ -16,7 +16,7 @@ Check your installations:
 
 ```bash
 node --version    # Should be v18.0.0 or higher
-npm --version     # Should be 9.0.0 or higher
+npm --version     # Should be 8.0.0 or higher (comes with Node.js 18+)
 git --version     # Any recent version
 ```
 
